@@ -25,7 +25,7 @@ public class OllamaConfig {
     public OllamaChatModel taskOllamaChatModel() {
         OllamaApi ollamaApi = new OllamaApi(baseUrl);
         return new OllamaChatModel(ollamaApi, OllamaOptions.builder()
-                .withModel(OllamaModel.LLAMA3_1)
+                .withModel(modelName)
                 .withTemperature(0.8)
                 .build());
 
