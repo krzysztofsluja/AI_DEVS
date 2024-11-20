@@ -15,14 +15,13 @@ import java.util.Optional;
 @Slf4j
 public class GetAvailableFilesService {
 
-    private static final String RESOURCES_PATH = "classpath:files/task6";
 
-    public List<String> getAvailableFiles() {
+    public List<String> getAvailableFiles(final String path) {
         try {
-            File directory = ResourceUtils.getFile(RESOURCES_PATH);
+            File directory = ResourceUtils.getFile(path);
             
             if (!directory.exists() || !directory.isDirectory()) {
-                log.warn("Directory {} does not exist or is not a directory", RESOURCES_PATH);
+                log.warn("Directory {} does not exist or is not a directory", path);
                 return Collections.emptyList();
             }
 
@@ -31,7 +30,7 @@ public class GetAvailableFilesService {
                     .orElse(Collections.emptyList());
                     
         } catch (FileNotFoundException e) {
-            log.error("Failed to access directory: {}", RESOURCES_PATH, e);
+            log.error("Failed to access directory: {}", path, e);
             return Collections.emptyList();
         }
     }

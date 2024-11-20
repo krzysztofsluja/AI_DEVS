@@ -27,6 +27,7 @@ public class ImageProcessingService {
     private final GetAvailableFilesService filesService;
     private static final String PROMPT_PATH = "prompts/city_image_processing.md";
     private static final String IMAGES_PATH = "files/task6/";
+    private static final String RESOURCES_PATH = "classpath:files/task6";
 
     public String processCityImages() {
         try {
@@ -34,7 +35,7 @@ public class ImageProcessingService {
             String systemPrompt = Files.readString(new ClassPathResource(PROMPT_PATH).getFile().toPath());
 
             List<Media> imageMediaList = new ArrayList<>();
-            for (String filename : filesService.getAvailableFiles()) {
+            for (String filename : filesService.getAvailableFiles(RESOURCES_PATH)) {
                 final Resource imageContent = new ClassPathResource(IMAGES_PATH + filename);
                 imageMediaList.add(new Media(MimeTypeUtils.IMAGE_PNG, imageContent));
             }

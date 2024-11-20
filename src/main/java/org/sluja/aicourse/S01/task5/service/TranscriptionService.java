@@ -6,7 +6,9 @@ import org.springframework.ai.openai.OpenAiAudioTranscriptionModel;
 import org.springframework.ai.openai.OpenAiAudioTranscriptionOptions;
 import org.springframework.ai.audio.transcription.AudioTranscriptionPrompt;
 import org.springframework.ai.openai.api.OpenAiAudioApi;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
 
@@ -31,8 +33,7 @@ public class TranscriptionService {
             "m4a", "mp3", "mp4", "mpeg", "mpga", "wav", "webm"
     );
 
-    public void transcribe() {
-        final List<String> files = downloadAudioFilesFromDirectoryService.getAudioFilePaths();
+    public void transcribe(final List<String> files) {
         createTranscriptionsDirectory();
         
         List<CompletableFuture<Void>> transcriptionFutures = files.stream()
@@ -43,6 +44,52 @@ public class TranscriptionService {
         CompletableFuture.allOf(transcriptionFutures.toArray(new CompletableFuture[0]))
                 .join();
         log.info("All transcriptions completed");
+    }
+
+    public String transcribeAndGetFile(final String audioFile, final String filePath) {
+        try {
+            log.info("Starting transcription for file: {}", audioFile);
+
+            var fileResource = new ClassPathResource(filePath + audioFile);
+            var transcriptionOptions = OpenAiAudioTranscriptionOptions.builder()
+                    .withModel("whisper-1")
+                    .withResponseFormat(OpenAiAudioApi.TranscriptResponseFormat.TEXT)
+                    .build();
+
+            var transcriptionRequest = new AudioTranscriptionPrompt(fileResource, transcriptionOptions);
+            var response = whisperTranscriptionClient.call(transcriptionRequest);
+
+            String transcription = response.getResult().getOutput();
+            log.info("Successfully transcribed file: {}", audioFile);
+            return transcription;
+
+        } catch (Exception e) {
+            log.error("Failed to transcribe file: {}", audioFile, e);
+            throw new RuntimeException("Failed to transcribe file: " + audioFile, e);
+        }
+    }
+
+    public String transcribeAndGetFile(final String url) {
+        try {
+            log.info("Starting transcription for file: {}", url);
+
+            var fileResource = new UrlResource(url);
+            var transcriptionOptions = OpenAiAudioTranscriptionOptions.builder()
+                    .withModel("whisper-1")
+                    .withResponseFormat(OpenAiAudioApi.TranscriptResponseFormat.TEXT)
+                    .build();
+
+            var transcriptionRequest = new AudioTranscriptionPrompt(fileResource, transcriptionOptions);
+            var response = whisperTranscriptionClient.call(transcriptionRequest);
+
+            String transcription = response.getResult().getOutput();
+            log.info("Successfully transcribed file: {}", url);
+            return transcription;
+
+        } catch (Exception e) {
+            log.error("Failed to transcribe file: {}", url, e);
+            throw new RuntimeException("Failed to transcribe file: " + url, e);
+        }
     }
     
     private boolean isSupportedFormat(String path) {
@@ -72,7 +119,7 @@ public class TranscriptionService {
         try {
             log.info("Starting transcription for file: {}", audioFile);
             
-            var fileResource = new FileSystemResource(audioFile);
+            var fileResource = new ClassPathResource("files/task8/" + audioFile);
             var transcriptionOptions = OpenAiAudioTranscriptionOptions.builder()
                     .withModel("whisper-1")
                     .withResponseFormat(OpenAiAudioApi.TranscriptResponseFormat.TEXT)

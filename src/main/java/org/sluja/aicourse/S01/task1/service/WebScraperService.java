@@ -8,6 +8,7 @@ import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,6 +25,14 @@ public class WebScraperService {
             return doc.select("p#human-question").text().replace("Question:", StringUtils.EMPTY);
         } catch (Exception e) {
             throw new RuntimeException("Failed to fetch question from website", e);
+        }
+    }
+
+    public Document getWebsite(final String url) {
+        try {
+            return Jsoup.connect(url).get();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
