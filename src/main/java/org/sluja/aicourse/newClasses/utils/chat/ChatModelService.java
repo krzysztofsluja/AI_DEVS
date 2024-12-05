@@ -50,6 +50,10 @@ public class ChatModelService {
         return getResponse(prompt);
     }
 
+    public String getResponseWithMessages(final String userMessage, final String systemMessage) {
+        return getResponse(buildPrompt(userMessage, systemMessage));
+    }
+
     private String getResponse(final Prompt prompt) {
         return chatModel.call(prompt)
                 .getResult()
